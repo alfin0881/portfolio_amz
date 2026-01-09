@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Portfolio | Mercedes AMG Style</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        petronas: {
+                            DEFAULT: '#00D2BE', // The iconic teal
+                            dim: 'rgba(0, 210, 190, 0.1)',
+                            glow: 'rgba(0, 210, 190, 0.6)'
+                        },
+                        dark: {
+                            900: '#0a0a0a',
+                            800: '#121212',
+                            card: 'rgba(20, 20, 20, 0.6)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'petronas-glow': '0 0 20px -5px rgba(0, 210, 190, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+
+        /* Custom Styles for things Tailwind can't easily handle purely via utility classes */
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+        }
+
+        /* Efek glow mengikuti kursor */
+        #cursor-glow {
+            will-change: background;
+        }
+
+        /* PERUBAHAN DISINI: Efek Blur Background */
+        .blurred-bg-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .blurred-bg-container::before {
+            content: "";
+            position: absolute; /* Tetap saat scroll */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('asset/img/bg4.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: blur(13px); /* Atur tingkat blur di sini */
+            transform: scale(1.1); /* Untuk menghilangkan garis putih di pinggir akibat blur */
+            z-index: -20; /* Di bawah segalanya */
+            opacity: 0.8; /* Atur transparansi agar tidak menutupi warna dasar body */
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-nav {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Scroll Reveal Animation Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Start Light Circle */
+        .f1-light {
+            width: 37px;
+            height: 37px;
+            border-radius: 50%;
+            background-color: #333;
+            border: 2px solid #444;
+            transition: background-color 0.1s;
+        }
+        .f1-light.on {
+            background-color: #ff0000; /* Red lights */
+            box-shadow: 0 0 15px #ff0000;
+        }
+        .f1-light.go {
+            background-color: #0dd42b; /* Lights out */
+            box-shadow: 0 0 15px #0eff3a;
+        }
+
+        .f1-rpm {
+        width: 320px;
+        padding: 12px;
+        background: #050505;
+        border-radius: 8px;
+        box-shadow: 0 0 40px rgba(0,210,190,.25);
+    }
+
+    .rpm-leds {
+        display: grid;
+        grid-template-columns: repeat(20, 1fr);
+        gap: 6px;
+    }
+
+    .rpm-leds span {
+        height: 10px;
+        background: #3a3a3a;
+        border-radius: 2px;
+        transition: background .08s, box-shadow .08s;
+    }
+
+    .rpm-leds span.active {
+        background: #00D2BE;
+        box-shadow: 0 0 12px #00D2BE;
+    }
+
+    /* Redline */
+    .rpm-leds span.red {
+        background: #ff2b2b;
+        box-shadow: 0 0 12px #ff2b2b;
+    }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-petronas selection:text-black overflow-x-hidden">
+    <div id="cursor-glow" class="pointer-events-none fixed inset-0 z-30 transition-opacity duration-300 opacity-0" 
+     style="background: radial-gradient(500px circle at var(--x) var(--y), rgba(0, 210, 190, 0.15), transparent 60%);">
+</div>
+
+    <div id="loader" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="flex space-x-4 mb-12">
+            <div class="f1-light" id="light-1"></div>
+            <div class="f1-light" id="light-2"></div>
+            <div class="f1-light" id="light-3"></div>
+            <div class="f1-light" id="light-4"></div>
+            <div class="f1-light" id="light-5"></div>
+        </div>
+        <div class="relative flex flex-col items-center">
+        <div class="f1-rpm">
+            <div class="rpm-leds">
+               
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+
+            <div class="text-center mt-6 font-display font-bold text-7xl text-white tracking-tighter">
+                <span id="speed-counter" class="italic">0</span><span class="text-5xl text-petronas ml-2 font-mono italic">%</span>
+            </div>
+        </div>
+        <p class="mt-8 text-xs text-gray-500 tracking-[0.2em] uppercase">Initializing Systems</p>
+    </div>
+
+    <nav class="fixed top-0 w-full z-40 glass-nav transition-all duration-300 px-10">
+        <div class="container mx-auto px-12 h-20 flex items-center justify-between">
+            <a href="#home" class="text-2xl font-display font-bold tracking-widest text-white hover:text-petronas transition-colors">
+                A<span class="text-petronas">M</span>Z
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium tracking-wide">
+                <a href="#home" class="nav-link text-gray-400 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-petronas/50">HOME</a>
+                <a href="#about" class="nav-link text-gray-400 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-petronas/50">ABOUT</a>
+                <a href="#skills" class="nav-link text-gray-400 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-petronas/50">SKILLS</a>
+                <a href="#projects" class="nav-link text-gray-400 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-petronas/50">PROJECTS</a>
+                <a href="#contact" class="nav-link text-gray-400 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-petronas/50">CONTACT</a>
+            </div>
+            <button class="md:hidden text-white focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="relative blurred-bg-container px-6 lg:px-12">
+        <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-petronas/5 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px]"></div>
+        </div>
+
+        <section id="home" class="min-h-screen flex items-center pt-20 relative px-10">
+            <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="reveal">
+                    <p class="text-petronas font-mono text-sm tracking-widest mb-4">/// FULL STACK DEVELOPER</p>
+                    <h1 class="font-display font-bold text-5xl md:text-7xl leading-tight mb-6">
+                        Precision in <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">Every Line</span>
+                    </h1>
+                    <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
+                        Crafting high-performance digital experiences with a focus on minimalist design and robust architecture.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#projects" class="px-8 py-3 bg-petronas text-black font-bold text-sm tracking-wider hover:bg-white transition-colors duration-300">VIEW WORK</a>
+                        <a href="#contact" class="px-8 py-3 border border-white/20 text-white font-bold text-sm tracking-wider hover:bg-white/5 transition-colors duration-300">CONTACT ME</a>
+                    </div>
+                </div>
+                <div class="reveal delay-200 flex justify-center md:justify-end">
+                    <div class="relative w-72 h-72 md:w-96 md:h-96">
+                        <div class="absolute inset-0 border border-petronas/30 rounded-full animate-pulse"></div>
+                        <div class="absolute inset-4 border border-white/10 rounded-full"></div>
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop" 
+                             alt="Profile" 
+                             class="w-full h-full object-cover rounded-full opacity-90 shadow-petronas-glow">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-32 relative">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center space-x-4 mb-12 reveal">
+                    <div class="h-[1px] w-12 bg-petronas"></div>
+                    <h2 class="text-3xl font-display font-bold text-white">ABOUT ME</h2>
+                </div>
+
+                <div class="glass-panel p-8 md:p-12 rounded-sm reveal">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <h3 class="text-2xl font-display font-semibold mb-6 text-white">Professional Profile</h3>
+                            <p class="text-gray-400 leading-relaxed mb-6">
+                                I am a passionate developer dedicated to building scalable web applications. My approach combines technical precision with an eye for aesthetic detail, ensuring that function never compromises form.
+                            </p>
+                            <p class="text-gray-400 leading-relaxed">
+                                With a background in Computer Science and years of hands-on experience, I specialize in creating seamless user interfaces backed by powerful server-side logic.
+                            </p>
+                            
+                            <div class="mt-8">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Mercedes_Benz_Silver_Logo.svg/2048px-Mercedes_Benz_Silver_Logo.svg.png" 
+                                     class="h-12 opacity-20 filter invert" alt="Inspiration Logo">
+                            </div>
+                        </div>
+
+                        <div class="border-l border-white/10 pl-0 md:pl-12">
+                            <h3 class="text-xl font-display font-medium text-petronas mb-6">Personal Data</h3>
+                            <ul class="space-y-6">
+                                <li class="grid grid-cols-3 gap-4 border-b border-white/5 pb-2">
+                                    <span class="text-gray-500 font-mono text-sm uppercase">Full Name</span>
+                                    <span class="col-span-2 text-white">Alex J. Doe</span>
+                                </li>
+                                <li class="grid grid-cols-3 gap-4 border-b border-white/5 pb-2">
+                                    <span class="text-gray-500 font-mono text-sm uppercase">Location</span>
+                                    <span class="col-span-2 text-white">Jakarta, Indonesia</span>
+                                </li>
+                                <li class="grid grid-cols-3 gap-4 border-b border-white/5 pb-2">
+                                    <span class="text-gray-500 font-mono text-sm uppercase">Education</span>
+                                    <span class="col-span-2 text-white">B.Sc. Computer Science</span>
+                                </li>
+                                <li class="grid grid-cols-3 gap-4 border-b border-white/5 pb-2">
+                                    <span class="text-gray-500 font-mono text-sm uppercase">Experience</span>
+                                    <span class="col-span-2 text-white">5+ Years</span>
+                                </li>
+                                <li class="grid grid-cols-3 gap-4">
+                                    <span class="text-gray-500 font-mono text-sm uppercase">Email</span>
+                                    <span class="col-span-2 text-petronas">hello@alexdoe.dev</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+      <section
+        id="skills"
+        class="relative py-16 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
+            <!-- FULL WIDTH BACKGROUND -->
+            <div class="absolute inset-0 bg-black/30 -z-10"></div>
+
+            <!-- CONTENT TETAP RAPI & TENGAH -->
+            <div class="container mx-auto px-6 lg:px-12">
+                
+                <div class="flex items-center space-x-4 mb-12 reveal px-12">
+                <div class="h-[1px] w-12 bg-petronas"></div>
+                <h2 class="text-3xl font-display font-bold text-white">
+                    TECHNICAL EXPERTISE
+                </h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 reveal px-10">
+                
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fab fa-react text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">REACT</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fab fa-js text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">JAVASCRIPT</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fab fa-python text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">PYTHON</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fas fa-database text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">SQL / NOSQL</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fab fa-docker text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">DOCKER</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fab fa-figma text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">UI DESIGN</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fab fa-git-alt text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">GIT</span>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col items-center justify-center group hover:border-petronas/50 transition">
+                    <i class="fas fa-code text-4xl text-gray-400 group-hover:text-petronas mb-4"></i>
+                    <span class="text-sm font-mono tracking-wider text-gray-300">TAILWIND</span>
+                </div>
+
+                </div>
+            </div>
+        </section>
+
+
+      <section id="projects" class="py-16 relative">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center space-x-4 mb-12 reveal">
+                    <div class="h-[1px] w-12 bg-petronas"></div>
+                    <h2 class="text-3xl font-display font-bold text-white">SELECTED PROJECTS</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal">
+                    
+                    <div class="glass-panel group overflow-hidden relative">
+                        
+                        <div class="h-48 bg-gray-800 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-petronas/20 group-hover:bg-transparent transition-all duration-500"></div>
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="Project 1">
+                        </div>
+                        
+                        <div class="p-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-white group-hover:text-petronas transition-colors">FinTech Dashboard</h3>
+                                <i class="fas fa-arrow-right text-gray-500 -rotate-45 group-hover:rotate-0 group-hover:text-petronas transition-all duration-300"></i>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-6 line-clamp-2">A high-frequency trading interface offering real-time data visualization and complex analytics.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs font-mono border border-white/10 px-2 py-1 text-gray-400">React</span>
+                                <span class="text-xs font-mono border border-white/10 px-2 py-1 text-gray-400">D3.js</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel group overflow-hidden relative">
+                         
+                        <div class="h-48 bg-gray-800 relative overflow-hidden">
+                             <div class="absolute inset-0 bg-petronas/20 group-hover:bg-transparent transition-all duration-500"></div>
+                            <img src="https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="Project 2">
+                        </div>
+                        <div class="p-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-white group-hover:text-petronas transition-colors">E-Commerce API</h3>
+                                <i class="fas fa-arrow-right text-gray-500 -rotate-45 group-hover:rotate-0 group-hover:text-petronas transition-all duration-300"></i>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-6 line-clamp-2">Robust backend infrastructure supporting 10k+ concurrent users with microservices architecture.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs font-mono border border-white/10 px-2 py-1 text-gray-400">Node.js</span>
+                                <span class="text-xs font-mono border border-white/10 px-2 py-1 text-gray-400">MongoDB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel group overflow-hidden relative">
+                        
+                        <div class="h-48 bg-gray-800 relative overflow-hidden">
+                             <div class="absolute inset-0 bg-petronas/20 group-hover:bg-transparent transition-all duration-500"></div>
+                            <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="Project 3">
+                        </div>
+                        <div class="p-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-white group-hover:text-petronas transition-colors">AI Analytics Tool</h3>
+                                <i class="fas fa-arrow-right text-gray-500 -rotate-45 group-hover:rotate-0 group-hover:text-petronas transition-all duration-300"></i>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-6 line-clamp-2">Machine learning integration for predictive analysis in supply chain management.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs font-mono border border-white/10 px-2 py-1 text-gray-400">Python</span>
+                                <span class="text-xs font-mono border border-white/10 px-2 py-1 text-gray-400">TensorFlow</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-32 relative">
+            <div class="container mx-auto px-6 max-w-4xl">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl font-display font-bold text-white mb-4">LET'S COLLABORATE</h2>
+                    <div class="h-[1px] w-24 bg-petronas mx-auto mb-6"></div>
+                    <p class="text-gray-400">Ready to accelerate your next project?</p>
+                </div>
+
+                <div class="glass-panel p-8 md:p-12 reveal">
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-mono text-petronas uppercase tracking-wider">Name</label>
+                                <input type="text" class="w-full bg-black/20 border border-white/10 text-white p-3 focus:outline-none focus:border-petronas focus:bg-petronas/5 transition-all duration-300">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-mono text-petronas uppercase tracking-wider">Email</label>
+                                <input type="email" class="w-full bg-black/20 border border-white/10 text-white p-3 focus:outline-none focus:border-petronas focus:bg-petronas/5 transition-all duration-300">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-mono text-petronas uppercase tracking-wider">Message</label>
+                            <textarea rows="4" class="w-full bg-black/20 border border-white/10 text-white p-3 focus:outline-none focus:border-petronas focus:bg-petronas/5 transition-all duration-300"></textarea>
+                        </div>
+                        <button type="button" class="w-full md:w-auto px-10 py-3 bg-petronas text-black font-bold tracking-widest hover:bg-white transition-colors duration-300 mt-4">
+                            TRANSMIT
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <footer class="py-8 border-t border-white/5 bg-black">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 font-mono">
+            <p>&copy; 2024 ALEX DOE. INSPIRED BY MERCEDES AMG PETRONAS.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" class="hover:text-petronas transition-colors">LINKEDIN</a>
+                <a href="#" class="hover:text-petronas transition-colors">GITHUB</a>
+                <a href="#" class="hover:text-petronas transition-colors">TWITTER</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        /* =========================
+        LOADER + F1 TELEMETRY
+        ========================== */
+
+        const loader = document.getElementById('loader');
+        const speedCounter = document.getElementById('speed-counter');
+
+        /* --- F1 START LIGHTS --- */
+        const lights = [
+            document.getElementById('light-1'),
+            document.getElementById('light-2'),
+            document.getElementById('light-3'),
+            document.getElementById('light-4'),
+            document.getElementById('light-5')
+        ];
+
+        /* --- RPM LED BAR --- */
+        const rpmLeds = document.querySelectorAll('.rpm-leds span');
+
+        let speed = 0;
+        const maxSpeed = 100;
+        const totalLeds = rpmLeds.length;
+
+        /* =========================
+        F1 LIGHT SEQUENCE
+        ========================== */
+
+        let lightIndex = 0;
+        const lightInterval = setInterval(() => {
+            if (lightIndex < lights.length) {
+                lights[lightIndex].classList.add('on');
+                lightIndex++;
+            } else {
+                clearInterval(lightInterval);
+
+                // Lights out
+                setTimeout(() => {
+                    lights.forEach(light => {
+                        light.classList.remove('on');
+                        light.classList.add('go');
+                    });
+
+                    startTelemetry(); // 🚀 launch
+                }, 700);
+            }
+        }, 600);
+
+        /* =========================
+        TELEMETRY ANIMATION
+        ========================== */
+
+        function startTelemetry() {
+            const telemetryInterval = setInterval(() => {
+
+                if (speed >= maxSpeed) {
+                    clearInterval(telemetryInterval);
+
+                    // Fade loader
+                    setTimeout(() => {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        document.body.style.overflowY = 'auto';
+                    }, 400);
+
+                    return;
+                }
+
+                speed += 4;
+                speedCounter.innerText = speed;
+
+                const activeLeds = Math.floor((speed / maxSpeed) * totalLeds);
+
+                rpmLeds.forEach((led, index) => {
+                    led.classList.remove('active', 'red');
+
+                    if (index < activeLeds) {
+                        if (index >= totalLeds - 4) {
+                            led.classList.add('red'); // redline
+                        } else {
+                            led.classList.add('active');
+                        }
+                    }
+                });
+
+            }, 40); // aggressive launch timing
+        }
+
+        /* =========================
+        SCROLL REVEAL + NAV
+        ========================== */
+
+        const reveals = document.querySelectorAll('.reveal');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        const onScroll = () => {
+            const windowHeight = window.innerHeight;
+            const scrollPos = window.scrollY + 120;
+
+            reveals.forEach(el => {
+                if (el.getBoundingClientRect().top < windowHeight - 100) {
+                    el.classList.add('active');
+                }
+            });
+
+            sections.forEach(sec => {
+                const top = sec.offsetTop - 150;
+                const height = sec.offsetHeight;
+                const id = sec.getAttribute('id');
+
+                if (scrollPos >= top && scrollPos < top + height) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('text-white', 'border-petronas');
+                        link.classList.add('text-gray-400', 'border-transparent');
+
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.remove('text-gray-400', 'border-transparent');
+                            link.classList.add('text-white', 'border-petronas');
+                        }
+                    });
+                }
+            });
+        };
+
+        window.addEventListener('scroll', onScroll);
+        onScroll();
+    });
+
+    /* =========================
+    CURSOR GLOW
+    ========================= */
+
+    const glow = document.getElementById('cursor-glow');
+
+    window.addEventListener('mousemove', e => {
+        glow.style.opacity = '1';
+        glow.style.setProperty('--x', `${e.clientX}px`);
+        glow.style.setProperty('--y', `${e.clientY}px`);
+    });
+
+    window.addEventListener('mouseleave', () => {
+        glow.style.opacity = '0';
+    });
+    </script>
+
+</body>
+</html>
